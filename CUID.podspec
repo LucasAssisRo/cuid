@@ -1,5 +1,5 @@
 Pod::Spec.new do |s|
-  s.name             = 'CUID'
+  s.name             = 'CUID-Swift5'
   s.version          = '1.0.0'
   s.summary          = 'Collision resistent UUID'
   s.description      = 'A Swift 5 port of the javascript CUID package.'
