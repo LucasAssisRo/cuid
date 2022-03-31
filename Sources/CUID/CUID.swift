@@ -18,17 +18,12 @@ private extension CUID {
     static var base: Int { 36 }
     static var blockSize: Int { 4 }
     static var fingerprintPadding: Int { 2 }
-    static var discreteValues: Int { 1_679_616 } // base * blockSize
-
-    private static var _count = 0
-    static var count: Int {
-        _count += 1
-        if _count == discreteValues { _count = 0 }
-        return _count
-    }
+    static var count = StaticCount()
 }
 
 internal extension CUID {
+    static var discreteValues: Int { 1_679_616 } // base * blockSize
+
     static var random: String {
         .init((0 ..< discreteValues).randomElement()!, radix: base)
             .padding(toLength: blockSize, withPad: "0", startingAt: 0)
@@ -58,13 +53,12 @@ public extension CUID {
     init(fingerprint: String) {
         self.cuidString = "c"
             + String(time(nil) * 1000, radix: CUID.base)
-            + String(CUID.count, radix: CUID.base).filled(to: CUID.blockSize)
+            + String(CUID.count(), radix: CUID.base).filled(to: CUID.blockSize)
             + CUID.encode(fingerprint: fingerprint)
             + CUID.random
             + CUID.random
     }
 
-    
     /// Initalizes a `CUID`.
     /// - Parameter uuid: Unique identifier to fingerprint the `CUID`.
     ///
