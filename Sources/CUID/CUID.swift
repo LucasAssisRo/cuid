@@ -3,7 +3,12 @@ import Foundation
 // MARK: - CUID
 
 /// Collision-resistant universal identifier.
+///
+/// A `CUID` is monotonically increasing, so identifiers generated later sort
+/// after earlier ones. Uniqueness across devices relies on the fingerprint
+/// given at creation, which should be stable for the installation.
 public struct CUID {
+  /// The identifier in its textual form, always prefixed with `c`.
   public let cuidString: String
 }
 
@@ -67,17 +72,20 @@ extension CUID: Hashable {}
 // MARK: Identifiable
 
 extension CUID: Identifiable {
+  /// The identifier itself, since a `CUID` is already unique.
   public var id: CUID { self }
 }
 
 // MARK: CustomStringConvertible
 
 extension CUID: CustomStringConvertible {
+  /// The identifier in its textual form.
   public var description: String { cuidString }
 }
 
 // MARK: CustomDebugStringConvertible
 
 extension CUID: CustomDebugStringConvertible {
+  /// The identifier in its textual form.
   public var debugDescription: String { description }
 }
