@@ -19,15 +19,17 @@ private extension CUID {
   static let count = StaticCount()
   static let origin = (instant: ContinuousClock.now, date: Date.now)
 
-  static let hostname: String = {
-    var buffer = [UInt8](repeating: 0, count: Int(NI_MAXHOST))
-    guard gethostname(&buffer, buffer.count) == 0 else { return "" }
-    return String(decoding: buffer.prefix { $0 != 0 }, as: UTF8.self)
-  }()
+  static let hostname = readHostname()
 
   static var milliseconds: Int {
     Int(origin.date.timeIntervalSince1970 * 1000)
       + Int((ContinuousClock.now - origin.instant) / .milliseconds(1))
+  }
+
+  static func readHostname() -> String {
+    var buffer = [UInt8](repeating: 0, count: Int(NI_MAXHOST))
+    guard gethostname(&buffer, buffer.count) == 0 else { return "" }
+    return String(decoding: buffer.prefix { $0 != 0 }, as: UTF8.self)
   }
 }
 
@@ -54,16 +56,12 @@ extension CUID {
 // MARK: - CUID + Initializer
 
 public extension CUID {
-  /// Initalizes a `CUID` fingerprinted with the host name of the machine.
-  ///
-  init() {
-    self.init(fingerprint: CUID.hostname)
-  }
-
   /// Initalizes a `CUID`.
-  /// - Parameter fingerprint: Client fingerprint used to generate the id.
+  /// - Parameter fingerprint: Client fingerprint used to generate the id,
+  ///   or `nil` to fingerprint with the host name of the machine.
   ///
-  init(fingerprint: String) {
+  init(fingerprint: String? = nil) {
+    let fingerprint = fingerprint ?? CUID.hostname
     cuidString = "c"
       + String(CUID.milliseconds, radix: CUID.base)
       + String(CUID.count(), radix: CUID.base).fitted(to: CUID.blockSize)
