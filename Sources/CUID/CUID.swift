@@ -99,6 +99,14 @@ extension CUID: Encodable {}
 
 extension CUID: Decodable {}
 
+// MARK: Comparable
+
+extension CUID: Comparable {
+  public static func < (lhs: CUID, rhs: CUID) -> Bool {
+    (lhs.cuidString.count, lhs.cuidString) < (rhs.cuidString.count, rhs.cuidString)
+  }
+}
+
 // MARK: Equatable
 
 extension CUID: Equatable {}
