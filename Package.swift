@@ -1,14 +1,21 @@
-// swift-tools-version:5.6
+// swift-tools-version: 6.3
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
   name: "CUID",
+  platforms: [
+    .macOS(.v15),
+    .iOS(.v18),
+    .watchOS(.v11),
+    .tvOS(.v18),
+    .visionOS(.v2),
+  ],
   products: [
     .library(
       name: "CUID",
-      targets: ["CUID"]
+      targets: ["CUID"],
     ),
   ],
   dependencies: [
@@ -17,11 +24,11 @@ let package = Package(
   targets: [
     .target(
       name: "CUID",
-      dependencies: []
+      dependencies: [],
     ),
     .testTarget(
       name: "CUIDTests",
-      dependencies: ["CUID"]
+      dependencies: ["CUID"],
     ),
-  ]
+  ],
 )

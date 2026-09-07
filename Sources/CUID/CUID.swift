@@ -16,7 +16,7 @@ private extension CUID {
   static var base: Int { 36 }
   static var blockSize: Int { 4 }
   static var fingerprintPadding: Int { 2 }
-  static var count = StaticCount()
+  static let count = StaticCount()
 }
 
 extension CUID {
