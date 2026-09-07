@@ -17,6 +17,18 @@ private extension CUID {
   static var blockSize: Int { 4 }
   static var fingerprintPadding: Int { 2 }
   static let count = StaticCount()
+  static let origin = (instant: ContinuousClock.now, date: Date.now)
+
+  static let hostname: String = {
+    var buffer = [UInt8](repeating: 0, count: Int(NI_MAXHOST))
+    guard gethostname(&buffer, buffer.count) == 0 else { return "" }
+    return String(decoding: buffer.prefix { $0 != 0 }, as: UTF8.self)
+  }()
+
+  static var milliseconds: Int {
+    Int(origin.date.timeIntervalSince1970 * 1000)
+      + Int((ContinuousClock.now - origin.instant) / .milliseconds(1))
+  }
 }
 
 extension CUID {
@@ -24,34 +36,37 @@ extension CUID {
 
   static var random: String {
     .init((0 ..< discreteValues).randomElement()!, radix: base)
-      .padding(toLength: blockSize, withPad: "0", startingAt: 0)
+      .fitted(to: blockSize)
   }
 
   static func encode(fingerprint: String) -> String {
     String(getpid(), radix: CUID.base)
-      .filled(to: fingerprintPadding)
+      .fitted(to: fingerprintPadding)
       + String(
-        fingerprint.unicodeScalars
-          .filter(\.isASCII)
-          .reduce(UInt32(fingerprint.count + CUID.base)) {
-            $0 + $1.value
-          },
-        radix: CUID.base
+        fingerprint.utf16
+          .reduce(UInt64(fingerprint.utf16.count + CUID.base)) { $0 + UInt64($1) },
+        radix: CUID.base,
       )
-      .filled(to: fingerprintPadding)
+      .fitted(to: fingerprintPadding)
   }
 }
 
 // MARK: - CUID + Initializer
 
 public extension CUID {
+  /// Initalizes a `CUID` fingerprinted with the host name of the machine.
+  ///
+  init() {
+    self.init(fingerprint: CUID.hostname)
+  }
+
   /// Initalizes a `CUID`.
   /// - Parameter fingerprint: Client fingerprint used to generate the id.
   ///
   init(fingerprint: String) {
     cuidString = "c"
-      + String(time(nil) * 1000, radix: CUID.base)
-      + String(CUID.count(), radix: CUID.base).filled(to: CUID.blockSize)
+      + String(CUID.milliseconds, radix: CUID.base)
+      + String(CUID.count(), radix: CUID.base).fitted(to: CUID.blockSize)
       + CUID.encode(fingerprint: fingerprint)
       + CUID.random
       + CUID.random
@@ -65,9 +80,17 @@ public extension CUID {
   }
 }
 
+// MARK: Equatable
+
+extension CUID: Equatable {}
+
 // MARK: Hashable
 
 extension CUID: Hashable {}
+
+// MARK: Sendable
+
+extension CUID: Sendable {}
 
 // MARK: Identifiable
 
