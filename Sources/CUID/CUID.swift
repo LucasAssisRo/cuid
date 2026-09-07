@@ -76,6 +76,29 @@ extension CUID {
   }
 }
 
+// MARK: RawRepresentable
+
+extension CUID: RawRepresentable {
+  /// The identifier in its textual form.
+  public var rawValue: String { cuidString }
+
+  /// > Important: Do not call this initializer. It reconstructs a ``CUID``
+  /// > that was generated earlier, so that one can be decoded or read back
+  /// > from storage. Call ``init(fingerprint:)`` to generate one.
+  @_spi(Rehydration) public init?(rawValue: String) {
+    guard rawValue.hasPrefix("c") else { return nil }
+    cuidString = rawValue
+  }
+}
+
+// MARK: Encodable
+
+extension CUID: Encodable {}
+
+// MARK: Decodable
+
+extension CUID: Decodable {}
+
 // MARK: Equatable
 
 extension CUID: Equatable {}
