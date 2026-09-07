@@ -1,9 +1,9 @@
 # CUID
 
-A Swift 5 port of the javascript [CUID](https://github.com/ericelliott/cuid) package.
-
-## Usage
+A Swift port of the JavaScript [CUID](https://github.com/ericelliott/cuid) library.
 
 ```swift
-  let cuid = CUID(fingerprint: deviceId.uuidString)
+let cuid = CUID(fingerprint: deviceId.uuidString)
 ```
+
+[API documentation](https://lucasassisro.github.io/cuid/)
