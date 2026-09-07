@@ -20,9 +20,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Read the Swift version the package requires
+        id: package
+        run: |
+          echo "swift=$(sed -n 's|^// swift-tools-version: *\([0-9][0-9.]*\).*|\1|p' Package.swift)" >> "$GITHUB_OUTPUT"
+
       - uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: latest-stable
+          xcode-version: latest
+
+      - name: Check the toolchain satisfies the package
+        run: |
+          required='${{ steps.package.outputs.swift }}'
+          installed=$(swift --version | sed -n 's/.*Apple Swift version \([0-9][0-9.]*\).*/\1/p')
+          case "$installed" in
+            "$required"*) echo "Swift $installed satisfies the required $required" ;;
+            *) echo "::error::Package.swift requires Swift $required but this runner provides $installed"; exit 1 ;;
+          esac
 
       - name: Build documentation
         run: |
